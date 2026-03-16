@@ -293,8 +293,8 @@ export default function About() {
                         <div className="text-xs text-[#555555]">{item.desc}</div>
                       </div>
                     </div>
-                    <div className="relative z-10 w-3 h-3 rounded-full shrink-0 mt-5 ring-4"
-                      style={{ background: '#F5A623', boxShadow: '0 0 12px rgba(245,166,35,0.5)', ringColor: '#0a0a0a' }} />
+                    <div className="relative ring-[#0a0a0a] z-10 w-3 h-3 rounded-full shrink-0 mt-5 ring-4"
+                      style={{ background: '#F5A623', boxShadow: '0 0 12px rgba(245,166,35,0.5)' }} />
                     <div className="flex-1" />
                   </div>
                 ))}
