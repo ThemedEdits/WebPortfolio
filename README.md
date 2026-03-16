@@ -75,23 +75,6 @@ npm run preview
 
 ---
 
-## 🔥 Firebase Setup
-
-Firebase is pre-configured. You need to:
-
-1. Go to [Firebase Console](https://console.firebase.google.com/) → **web-portfolio-te**
-2. Enable **Firestore Database** in production mode
-3. Set Firestore rules:
-
----
-
-## ☁️ Cloudinary Setup
-
-Already configured:
-- **Cloud name:** `dhbwpnsc4`
-- **Upload preset:** `web-portfolio-te`
-
-Make sure the upload preset exists in your [Cloudinary Console](https://cloudinary.com/console) as **unsigned**.
 
 Features:
 - Dashboard overview (total projects, featured, stats)
@@ -103,26 +86,7 @@ Features:
 
 ---
 
-## 🚀 Deploy to Vercel
 
-### Option A — GitHub → Vercel (Recommended)
-
-1. Push this repo to GitHub
-2. Go to [vercel.com](https://vercel.com) → **New Project**
-3. Import your GitHub repository
-4. Framework: **Vite** (auto-detected)
-5. Click **Deploy**
-
-`vercel.json` handles SPA routing automatically.
-
-### Option B — Vercel CLI
-
-```bash
-npm install -g vercel
-vercel
-```
-
----
 
 ## 📝 Adding Projects (Admin)
 
@@ -153,4 +117,4 @@ Projects appear instantly on the live site via Firebase real-time reads.
 
 ---
 
-Built with ❤️ by **Hammad Ahmed** — Themed Edits
+Built by **Hammad Ahmed** — Themed Edits
