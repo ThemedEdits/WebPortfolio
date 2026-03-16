@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="a" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <defs>
+    <style>
+      .b {
+        fill: #fbae17;
+      }
+
+      .b, .c {
+        stroke-width: 0px;
+      }
+
+      .c {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <rect class="c" x="174.83" y="283.65" width="66.13" height="185.23" transform="translate(-205.17 257.21) rotate(-45)"/>
+  <rect class="c" x="343.26" y="115.33" width="66.13" height="185.23" transform="translate(-36.82 327.01) rotate(-45)"/>
+  <polygon class="b" points="380.98 334.16 334.22 380.93 165.78 212.6 81.57 296.82 34.8 250.05 250 34.86 296.76 81.62 212.55 165.84 380.98 334.16"/>
+</svg>
