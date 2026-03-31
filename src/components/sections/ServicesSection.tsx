@@ -70,19 +70,15 @@ const services = [
 function ServiceCardSkeleton() {
   return (
     <div className="rounded-2xl p-6 flex flex-col gap-4" style={{ background: '#111111', border: '1px solid #222222' }}>
-      {/* Icon */}
       <div className="w-12 h-12 rounded-2xl"
         style={{ background: 'linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%)', backgroundSize: '400% 100%', animation: 'svcShimmer 1.6s ease infinite' }} />
-      {/* Title */}
       <div className="h-5 w-3/4 rounded-lg"
         style={{ background: 'linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%)', backgroundSize: '400% 100%', animation: 'svcShimmer 1.6s ease infinite' }} />
-      {/* Desc lines */}
       <div className="space-y-2">
         <div className="h-3 w-full rounded-md" style={{ background: 'linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%)', backgroundSize: '400% 100%', animation: 'svcShimmer 1.6s ease infinite' }} />
         <div className="h-3 w-5/6 rounded-md" style={{ background: 'linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%)', backgroundSize: '400% 100%', animation: 'svcShimmer 1.6s ease infinite' }} />
         <div className="h-3 w-4/6 rounded-md" style={{ background: 'linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%)', backgroundSize: '400% 100%', animation: 'svcShimmer 1.6s ease infinite' }} />
       </div>
-      {/* Features */}
       <div className="space-y-2 pt-1">
         {[0,1,2,3].map(i => (
           <div key={i} className="flex items-center gap-2">
@@ -92,7 +88,6 @@ function ServiceCardSkeleton() {
           </div>
         ))}
       </div>
-      {/* Price row */}
       <div className="flex items-center justify-between mt-auto pt-2">
         <div className="h-8 w-16 rounded-lg" style={{ background: 'linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%)', backgroundSize: '400% 100%', animation: 'svcShimmer 1.6s ease infinite' }} />
         <div className="h-4 w-20 rounded-md" style={{ background: 'linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%)', backgroundSize: '400% 100%', animation: 'svcShimmer 1.6s ease infinite' }} />
@@ -107,20 +102,31 @@ export default function ServicesSection() {
   const [loaded, setLoaded] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
+  // Trigger real cards when section scrolls into view — no fake timeout
   useEffect(() => {
-    // Simulate brief load for skeleton demo — in real use just remove this timeout
-    const t = setTimeout(() => setLoaded(true), 600);
-    return () => clearTimeout(t);
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setLoaded(true); observer.disconnect(); } },
+      { threshold: 0.05 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
+  // After cards mount, run sec-item reveal observer
   useEffect(() => {
-    const el = ref.current; if (!el) return;
+    const el = ref.current;
+    if (!el || !loaded) return;
     const observer = new IntersectionObserver(
-      entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
-      { threshold: 0.1 }
+      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target); } }),
+      { threshold: 0.05 }
     );
-    el.querySelectorAll('.reveal').forEach(child => observer.observe(child));
-    return () => observer.disconnect();
+    // Small delay so DOM has painted the new cards before we observe
+    const t = setTimeout(() => {
+      el.querySelectorAll('.sec-item:not(.in-view)').forEach(child => observer.observe(child));
+    }, 30);
+    return () => { clearTimeout(t); observer.disconnect(); };
   }, [loaded]);
 
   return (
@@ -141,7 +147,7 @@ export default function ServicesSection() {
         style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 50%, rgba(245,166,35,0.025) 0%, transparent 70%)' }} />
 
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="reveal">
+        <div className="sec-item" style={{ animationDelay: '0s' }}>
           <SectionHeader tag="Services" title="What I" highlight="Offer"
             subtitle="Premium development services tailored to bring your vision to life." />
         </div>
@@ -157,9 +163,9 @@ export default function ServicesSection() {
                 return (
                   <div
                     key={service.title}
-                    className="reveal relative flex flex-col rounded-2xl overflow-hidden cursor-default transition-all duration-400"
+                    className="sec-item relative flex flex-col rounded-2xl overflow-hidden cursor-default"
                     style={{
-                      transitionDelay: `${i * 0.1}s`,
+                      animationDelay: `${0.1 + i * 0.1}s`,
                       transform: isHovered ? 'translateY(-8px) scale(1.01)' : 'translateY(0) scale(1)',
                       transition: 'transform 0.35s cubic-bezier(0.22,1,0.36,1)',
                     }}
@@ -167,18 +173,17 @@ export default function ServicesSection() {
                     onMouseLeave={() => setHoveredIndex(null)}
                   >
                     {/* Hard outer glow border on hover */}
-                    <div className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300"
+                    <div className="absolute inset-0 rounded-2xl pointer-events-none"
                       style={{
                         boxShadow: isHovered
                           ? `0 0 0 1.5px ${service.borderGlow}, 0 8px 40px ${service.borderGlow}40, 0 0 60px ${service.borderGlow}15`
                           : `0 0 0 1px ${service.borderSoft}`,
-                        opacity: 1,
                         zIndex: 2,
+                        transition: 'box-shadow 0.3s',
                       }} />
 
                     {/* Card bg: dark base + gradient overlay */}
-                    <div className="absolute inset-0 rounded-2xl"
-                      style={{ background: '#111111' }} />
+                    <div className="absolute inset-0 rounded-2xl" style={{ background: '#111111' }} />
                     <div className="absolute inset-0 rounded-2xl transition-opacity duration-300"
                       style={{ background: service.gradient, opacity: isHovered ? 1 : 0.6 }} />
 
@@ -199,11 +204,12 @@ export default function ServicesSection() {
                       )}
 
                       {/* Icon */}
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300"
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
                         style={{
                           background: service.iconBg,
                           border: `1px solid ${service.borderGlow}`,
                           transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                          transition: 'transform 0.3s',
                         }}>
                         <Icon size={22} style={{ color: service.iconColor }} />
                       </div>
@@ -262,7 +268,7 @@ export default function ServicesSection() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="reveal text-center mt-10 sm:mt-14" style={{ transitionDelay: '0.4s' }}>
+        <div className="sec-item text-center mt-10 sm:mt-14" style={{ animationDelay: '0.5s' }}>
           <p className="text-sm text-[#555555] mb-4">Have a custom project in mind?</p>
           <Link to="/contact" className="btn-outline inline-flex items-center gap-2">
             Let's Talk <ArrowRight size={14} />

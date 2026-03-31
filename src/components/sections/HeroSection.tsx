@@ -49,28 +49,44 @@ export default function HeroSection() {
       <div className="orb w-[400px] h-[400px] bottom-[-100px] right-[-100px]" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)' }} />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 text-center">
+        <style>{`
+          @keyframes heroFadeUp {
+            from { opacity: 0; transform: translateY(24px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0)  scale(1);    }
+          }
+          .hero-item {
+            opacity: 0;
+            animation: heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          }
+        `}</style>
+
         {/* Badge */}
-        <div className="reveal inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 sm:mb-8 glass" style={{ border: '1px solid rgba(255,208,122,0.2)' }}>
+        <div className="hero-item inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 sm:mb-8 glass"
+          style={{ border: '1px solid rgba(255,208,122,0.2)', animationDelay: '0.05s' }}>
           <span className="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse" />
           <span className="text-xs font-mono text-[#4ade80] tracking-wider">Available for projects</span>
         </div>
 
         {/* Headline */}
-        <h1 className="reveal font-display font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight text-white mb-5 sm:mb-6" style={{ transitionDelay: '0.1s' }}>
+        <h1 className="hero-item font-display font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95] tracking-tight text-white mb-5 sm:mb-6"
+          style={{ animationDelay: '0.15s' }}>
           Crafting modern
           <br />
           <span className="text-gradient">digital experiences</span>
         </h1>
 
-        <p className="reveal text-base sm:text-lg md:text-xl text-[#555555] max-w-2xl mx-auto mb-3 sm:mb-4 font-body" style={{ transitionDelay: '0.2s' }}>
+        <p className="hero-item text-base sm:text-lg md:text-xl text-[#555555] max-w-2xl mx-auto mb-3 sm:mb-4 font-body"
+          style={{ animationDelay: '0.25s' }}>
           Full Stack Web Developer
         </p>
-        <p className="reveal text-sm sm:text-base text-[#444444] max-w-xl mx-auto mb-10 sm:mb-12" style={{ transitionDelay: '0.25s' }}>
+        <p className="hero-item text-sm sm:text-base text-[#444444] max-w-xl mx-auto mb-10 sm:mb-12"
+          style={{ animationDelay: '0.32s' }}>
           Building fast, scalable and beautiful web applications that drive real business results.
         </p>
 
         {/* CTAs */}
-        <div className="reveal flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-14 sm:mb-20" style={{ transitionDelay: '0.3s' }}>
+        <div className="hero-item flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-14 sm:mb-20"
+          style={{ animationDelay: '0.4s' }}>
           <Link to="/projects" className="btn-primary flex items-center gap-2 text-sm sm:text-base px-7 sm:px-8 py-3.5 sm:py-4 w-full sm:w-auto justify-center">
             View Projects <ArrowRight size={16} />
           </Link>
@@ -80,7 +96,8 @@ export default function HeroSection() {
         </div>
 
         {/* Stats */}
-        <div className="reveal flex flex-row items-center justify-center gap-8 sm:gap-16" style={{ transitionDelay: '0.4s' }}>
+        <div className="hero-item flex flex-row items-center justify-center gap-8 sm:gap-16"
+          style={{ animationDelay: '0.5s' }}>
           {[
             { value: '20+', label: 'Projects Built' },
             { value: '5+', label: 'Years Experience' },

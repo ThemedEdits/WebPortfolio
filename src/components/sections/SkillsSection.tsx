@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import SectionHeader from '../ui/SectionHeader';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 const skillGroups = [
   { label: 'Frontend', color: '#F5A623', skills: [{ name: 'React', level: 95 }, { name: 'Next.js', level: 88 }, { name: 'TypeScript', level: 90 }, { name: 'JavaScript', level: 96 }, { name: 'TailwindCSS', level: 93 }] },
@@ -16,26 +17,21 @@ function buildInitialCounts() {
 }
 
 export default function SkillsSection() {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useScrollReveal();
   const [animated, setAnimated] = useState(false);
   const [counts, setCounts] = useState<Record<string, number>>(buildInitialCounts);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const revealObserver = new IntersectionObserver(
-      entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
-      { threshold: 0.1 }
-    );
-    el.querySelectorAll('.reveal').forEach(child => revealObserver.observe(child));
-    const skillsObserver = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting && !animated) setAnimated(true); },
+    const grid = gridRef.current;
+    if (!grid) return;
+    const observer = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting && !animated) { setAnimated(true); observer.disconnect(); } },
       { threshold: 0.3 }
     );
-    const grid = el.querySelector('.skills-grid');
-    if (grid) skillsObserver.observe(grid);
-    return () => { revealObserver.disconnect(); skillsObserver.disconnect(); };
-  }, []);
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, [animated]);
 
   useEffect(() => {
     if (!animated) return;
@@ -52,16 +48,16 @@ export default function SkillsSection() {
   }, [animated]);
 
   return (
-    <section ref={ref} className="py-20 sm:py-28 relative overflow-hidden">
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent, rgba(245,166,35,0.02), transparent)' }} />
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-20 sm:py-28 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent, rgba(245,166,35,0.02), transparent)' }} />
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="reveal">
+        <div className="sec-item" style={{ animationDelay: '0s' }}>
           <SectionHeader tag="Skills" title="My Technical" highlight="Arsenal" subtitle="A carefully curated set of technologies I use to build exceptional digital products." />
         </div>
 
-        <div className="skills-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
+        <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
           {skillGroups.map((group, gi) => (
-            <div key={group.label} className="reveal glass rounded-2xl p-5 sm:p-6 glass-hover" style={{ transitionDelay: `${gi * 0.12}s` }}>
+            <div key={group.label} className="sec-item glass rounded-2xl p-5 sm:p-6 glass-hover" style={{ animationDelay: `${0.1 + gi * 0.12}s` }}>
               <div className="flex items-center gap-3 mb-5 sm:mb-6">
                 <div className="w-2 h-2 rounded-full" style={{ background: group.color }} />
                 <h3 className="font-display font-semibold text-white text-sm sm:text-base">{group.label}</h3>
@@ -87,14 +83,11 @@ export default function SkillsSection() {
           ))}
         </div>
 
-        <div className="reveal relative">
-          {/* Left fade */}
+        <div className="sec-item relative" style={{ animationDelay: '0.4s' }}>
           <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
             style={{ background: 'linear-gradient(to right, #0a0a0a, transparent)' }} />
-          {/* Right fade */}
           <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
             style={{ background: 'linear-gradient(to left, #0a0a0a, transparent)' }} />
-
           <div className="overflow-hidden">
             <div className="flex gap-3 animate-[scroll_25s_linear_infinite]" style={{ width: 'max-content' }}>
               {[...techBadges, ...techBadges].map((tech, i) => (

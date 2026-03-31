@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ExternalLink, MessageSquare, ArrowRight } from 'lucide-react';
 import TechStackIcons from './TechStackIcons';
+import NoImagePlaceholder from './NoImagePlaceholder';
 import type { Project } from '../../hooks/useProjects';
 
 interface Props {
@@ -20,9 +21,8 @@ export default function ProjectCard({ project }: Props) {
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #1a1a1a, #111111)' }}>
-            <span className="font-display font-bold text-4xl text-gradient opacity-30">TE</span>
+          <div className="relative w-full h-full">
+            <NoImagePlaceholder size="md" />
           </div>
         )}
         {/* Overlay */}

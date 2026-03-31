@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, MessageSquare, Check } from 'lucide-react';
 import { getProjectBySlug, type Project } from '../../hooks/useProjects';
 import TechStackIcons from '../../components/ui/TechStackIcons';
+import NoImagePlaceholder from '../../components/ui/NoImagePlaceholder';
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -67,26 +68,60 @@ export default function ProjectDetail() {
         </div>
 
         {/* Image Gallery */}
-        {allImages.length > 0 && (
-          <div className="mb-12">
-            <div className="rounded-2xl overflow-hidden mb-4" style={{ border: '1px solid #222222' }}>
-              <img src={allImages[activeImg]} alt={project.title}
-                className="w-full h-[450px] object-cover" />
-            </div>
-            {allImages.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2">
+        <div className="mb-10 sm:mb-12">
+          {/* Main image — 4:3 ratio (width wider than tall but more square) */}
+          <div className="rounded-2xl overflow-hidden mb-3 sm:mb-4 relative mx-auto"
+            style={{ border: '1px solid #222222', maxWidth: '680px', aspectRatio: '4/3' }}>
+            {allImages.length > 0 ? (
+              <img
+                src={allImages[activeImg]}
+                alt={project.title}
+                className="w-full h-full object-cover transition-opacity duration-300"
+                key={activeImg}
+              />
+            ) : (
+              <div className="relative w-full h-full">
+                <NoImagePlaceholder size="lg" />
+              </div>
+            )}
+          </div>
+
+          {/* Thumbnail carousel — faded edges, scrollable */}
+          {allImages.length > 1 && (
+            <div className="relative mx-auto" style={{ maxWidth: '680px' }}>
+              {/* Left fade */}
+              <div className="absolute left-0 top-0 bottom-0 w-10 z-10 pointer-events-none rounded-l-xl"
+                style={{ background: 'linear-gradient(to right, #0a0a0a, transparent)' }} />
+              {/* Right fade */}
+              <div className="absolute right-0 top-0 bottom-0 w-10 z-10 pointer-events-none rounded-r-xl"
+                style={{ background: 'linear-gradient(to left, #0a0a0a, transparent)' }} />
+
+              <div
+                className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-1"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+              >
+                <style>{`.thumb-scroll::-webkit-scrollbar { display: none; }`}</style>
                 {allImages.map((img, i) => (
-                  <button key={i} onClick={() => setActiveImg(i)}
-                    className={`shrink-0 w-20 h-16 rounded-xl overflow-hidden transition-all duration-200 ${
-                      i === activeImg ? 'ring-2 ring-accent' : 'opacity-50 hover:opacity-80'
-                    }`}>
+                  <button
+                    key={i}
+                    onClick={() => setActiveImg(i)}
+                    className="thumb-scroll shrink-0 rounded-xl overflow-hidden transition-all duration-200"
+                    style={{
+                      width: 'clamp(56px, 14vw, 80px)',
+                      aspectRatio: '4/3',
+                      outline: i === activeImg ? '2px solid #F5A623' : '2px solid transparent',
+                      outlineOffset: '2px',
+                      opacity: i === activeImg ? 1 : 0.45,
+                      transform: i === activeImg ? 'scale(1.04)' : 'scale(1)',
+                    }}
+                  >
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main content */}

@@ -262,3 +262,20 @@
 .react-hot-toast {
   font-family: 'DM Sans', sans-serif !important;
 }
+
+
+
+
+
+@keyframes secFadeUp {
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.sec-item {
+  opacity: 0;
+  animation: secFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-play-state: paused;
+}
+.sec-item.in-view {
+  animation-play-state: running;
+}

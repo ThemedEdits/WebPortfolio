@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import SectionHeader from '../ui/SectionHeader';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 const points = [
   'Passion for building modern, scalable web tools',
@@ -10,25 +10,12 @@ const points = [
 ];
 
 export default function AboutSection() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
-      { threshold: 0.1 }
-    );
-    el.querySelectorAll('.reveal').forEach(child => observer.observe(child));
-    return () => observer.disconnect();
-  }, []);
-
+  const ref = useScrollReveal();
   return (
-    <section ref={ref} className="py-20 sm:py-28 max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-20 sm:py-28 max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
         {/* Visual side */}
-        <div className="reveal relative order-2 lg:order-1" style={{ transitionDelay: '0.15s' }}>
+        <div className="sec-item relative order-2 lg:order-1" style={{ animationDelay: '0.15s' }}>
           <div className="relative mx-auto max-w-sm lg:max-w-none">
             <div className="gradient-border p-1 rounded-3xl">
               <div className="rounded-3xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #111111, #161616)' }}>
@@ -61,10 +48,10 @@ export default function AboutSection() {
 
         {/* Text side */}
         <div className="order-1 lg:order-2 space-y-0">
-          <div className="reveal" style={{ transitionDelay: '0.05s' }}>
+          <div className="sec-item" style={{ animationDelay: '0.05s' }}>
             <SectionHeader tag="About Me" title="The person behind" highlight="Themed Edits" center={false} />
           </div>
-          <div className="reveal space-y-4" style={{ transitionDelay: '0.15s' }}>
+          <div className="sec-item space-y-4" style={{ animationDelay: '0.15s' }}>
             <p className="text-[#888880] leading-relaxed text-sm sm:text-base">
               Hi, I'm <span className="text-white font-semibold">Hammad Ahmed</span>, a full stack web developer with a sharp eye for design and a deep love for clean, efficient code. Under the brand <span className="text-gradient font-semibold">Themed Edits</span>, I build premium digital products that help businesses stand out.
             </p>
@@ -72,7 +59,7 @@ export default function AboutSection() {
               My work bridges the gap between beautiful design and robust engineering — from SaaS platforms and web apps to landing pages that convert. Every pixel and every function is intentional.
             </p>
           </div>
-          <div className="reveal mt-6 sm:mt-8 space-y-3" style={{ transitionDelay: '0.25s' }}>
+          <div className="sec-item mt-6 sm:mt-8 space-y-3" style={{ animationDelay: '0.25s' }}>
             {points.map(point => (
               <div key={point} className="flex items-start gap-3">
                 <CheckCircle2 size={16} className="text-[#FFD07A] mt-0.5 shrink-0" />

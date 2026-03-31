@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import SectionHeader from '../ui/SectionHeader';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 const testimonials = [
   { name: 'Sarah Johnson', role: 'Founder, LaunchPad', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face', text: 'Hammad delivered our SaaS dashboard on time and beyond expectations. The UI is stunning and performance is incredible. Themed Edits truly understands premium digital experiences.', rating: 5 },
@@ -10,16 +11,9 @@ const testimonials = [
 ];
 
 export default function TestimonialsSection() {
+  const ref = useScrollReveal();
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const observer = new IntersectionObserver(entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')), { threshold: 0.1 });
-    el.querySelectorAll('.reveal').forEach(child => observer.observe(child));
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => go(1), 5000);
@@ -35,10 +29,12 @@ export default function TestimonialsSection() {
   const t = testimonials[current];
 
   return (
-    <section ref={ref} className="py-20 sm:py-28 max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
-      <div className="reveal"><SectionHeader tag="Testimonials" title="Client" highlight="Feedback" subtitle="What people say about working with Themed Edits." /></div>
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-20 sm:py-28 max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
+      <div className="sec-item" style={{ animationDelay: '0s' }}>
+        <SectionHeader tag="Testimonials" title="Client" highlight="Feedback" subtitle="What people say about working with Themed Edits." />
+      </div>
 
-      <div className="reveal max-w-2xl mx-auto" style={{ transitionDelay: '0.1s' }}>
+      <div className="sec-item max-w-2xl mx-auto" style={{ animationDelay: '0.12s' }}>
         <div className="relative glass rounded-2xl sm:rounded-3xl p-7 sm:p-10 text-center" style={{ border: '1px solid rgba(245,166,35,0.12)' }}>
           <div className="absolute top-6 left-8 text-5xl sm:text-6xl font-display text-[#F5A623]/10 leading-none select-none">"</div>
           <div className={`transition-all duration-300 ${animating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
@@ -58,7 +54,8 @@ export default function TestimonialsSection() {
             <button onClick={() => go(-1)} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full glass flex items-center justify-center text-[#555555] hover:text-white transition-colors"><ChevronLeft size={16} /></button>
             <div className="flex gap-2">
               {testimonials.map((_, i) => (
-                <button key={i} onClick={() => setCurrent(i)} className="h-1.5 rounded-full transition-all duration-300" style={{ width: i === current ? '24px' : '8px', background: i === current ? '#F5A623' : '#2a2a2a' }} />
+                <button key={i} onClick={() => setCurrent(i)} className="h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: i === current ? '24px' : '8px', background: i === current ? '#F5A623' : '#2a2a2a' }} />
               ))}
             </div>
             <button onClick={() => go(1)} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full glass flex items-center justify-center text-[#555555] hover:text-white transition-colors"><ChevronRight size={16} /></button>
