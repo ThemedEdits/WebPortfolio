@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, orderBy, query, doc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, where } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, doc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, where, writeBatch } from 'firebase/firestore';
 import { db } from '../utils/firebase';
+import { onSnapshot } from 'firebase/firestore';
 
 export interface Project {
   id: string;
@@ -13,6 +14,7 @@ export interface Project {
   techStack: string[];
   liveUrl?: string;
   featured?: boolean;
+  priority?: number;       // lower = shown first in featured section
   category: string;
   features?: string[];
   createdAt?: any;
@@ -23,10 +25,10 @@ export function toSlug(title: string): string {
   return title
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9\s-]/g, '')   // remove special chars
-    .replace(/\s+/g, '-')            // spaces → hyphens
-    .replace(/-+/g, '-')             // collapse multiple hyphens
-    .replace(/^-|-$/g, '');          // trim leading/trailing hyphens
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 export function useProjects() {
@@ -48,7 +50,30 @@ export function useProjects() {
     }
   };
 
-  useEffect(() => { fetchProjects(); }, []);
+  useEffect(() => {
+  setLoading(true);
+
+  const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snap) => {
+      const data = snap.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      } as Project));
+
+      setProjects(data);
+      setLoading(false);
+    },
+    (err) => {
+      setError(err.message);
+      setLoading(false);
+    }
+  );
+
+  return () => unsubscribe();
+}, []);
 
   return { projects, loading, error, refetch: fetchProjects };
 }
@@ -62,7 +87,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   return { id: d.id, ...d.data() } as Project;
 }
 
-/** Fallback: fetch by Firestore doc ID (for backwards compat) */
+/** Fallback: fetch by Firestore doc ID */
 export async function getProject(id: string): Promise<Project | null> {
   const ref = doc(db, 'projects', id);
   const snap = await getDoc(ref);
@@ -80,4 +105,13 @@ export async function updateProject(id: string, data: Partial<Project>) {
 
 export async function deleteProject(id: string) {
   return deleteDoc(doc(db, 'projects', id));
+}
+
+/** Batch-update priority for multiple projects at once (drag-to-reorder) */
+export async function updateProjectPriorities(updates: { id: string; priority: number }[]) {
+  const batch = writeBatch(db);
+  updates.forEach(({ id, priority }) => {
+    batch.update(doc(db, 'projects', id), { priority });
+  });
+  return batch.commit();
 }

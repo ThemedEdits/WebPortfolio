@@ -8,6 +8,25 @@ const skillGroups = [
   { label: 'Tools & Design', color: '#FFD07A', skills: [{ name: 'Figma', level: 82 }, { name: 'Git & GitHub', level: 92 }, { name: 'VS Code', level: 97 }, { name: 'Vercel', level: 90 }, { name: 'Framer Motion', level: 85 }] },
 ];
 
+// Map badge label → devicon class name
+const DEVICON_MAP: Record<string, string> = {
+  'React':         'devicon-react-original colored',
+  'TypeScript':    'devicon-typescript-plain colored',
+  'Next.js':       'devicon-nextjs-plain',
+  'Node.js':       'devicon-nodejs-plain colored',
+  'Firebase':      'devicon-firebase-plain colored',
+  'TailwindCSS':   'devicon-tailwindcss-plain colored',
+  'Figma':         'devicon-figma-plain colored',
+  'Git':           'devicon-git-plain colored',
+  'REST APIs':     'devicon-fastapi-plain colored',
+  'MongoDB':       'devicon-mongodb-plain colored',
+  'Framer Motion': 'devicon-framermotion-original',
+  'Vercel':        'devicon-vercel-plain',
+  'Vite':          'devicon-vitejs-plain colored',
+  'JavaScript':    'devicon-javascript-plain colored',
+  'ShadCN':        'devicon-tailwindcss-plain colored',
+};
+
 const techBadges = ['React', 'TypeScript', 'Next.js', 'Node.js', 'Firebase', 'TailwindCSS', 'Figma', 'Git', 'REST APIs', 'MongoDB', 'Framer Motion', 'Vercel', 'Vite', 'JavaScript', 'ShadCN'];
 
 function buildInitialCounts() {
@@ -49,6 +68,47 @@ export default function SkillsSection() {
 
   return (
     <section ref={ref as React.RefObject<HTMLElement>} className="py-20 sm:py-28 relative overflow-hidden">
+      {/* devicons CDN */}
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+
+      <style>{`
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* Glass badge */
+        .tech-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 6px 14px 6px 10px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.2);
+          backdrop-filter: blur(12px);
+          white-space: nowrap;
+          transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+          cursor: default;
+        }
+        .tech-badge:hover {
+          background: rgba(245,166,35,0.08);
+          border-color: rgba(245,166,35,0.25);
+          box-shadow: inset 0 1px 0 rgba(245,166,35,0.1), 0 0 12px rgba(245,166,35,0.08);
+        }
+        .tech-badge i {
+          font-size: 15px;
+          line-height: 1;
+        }
+        .tech-badge span {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: #888880;
+          letter-spacing: 0.02em;
+        }
+        .tech-badge:hover span {
+          color: #b0b0a8;
+        }
+      `}</style>
+
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent, rgba(245,166,35,0.02), transparent)' }} />
       <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
         <div className="sec-item" style={{ animationDelay: '0s' }}>
@@ -83,21 +143,27 @@ export default function SkillsSection() {
           ))}
         </div>
 
+        {/* Marquee with logo + text badges */}
         <div className="sec-item relative" style={{ animationDelay: '0.4s' }}>
+          {/* Left fade */}
           <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
             style={{ background: 'linear-gradient(to right, #0a0a0a, transparent)' }} />
+          {/* Right fade */}
           <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
             style={{ background: 'linear-gradient(to left, #0a0a0a, transparent)' }} />
-          <div className="overflow-hidden">
-            <div className="flex gap-3 animate-[scroll_25s_linear_infinite]" style={{ width: 'max-content' }}>
+
+          <div className="overflow-hidden py-1">
+            <div className="flex gap-3 animate-[scroll_30s_linear_infinite]" style={{ width: 'max-content' }}>
               {[...techBadges, ...techBadges].map((tech, i) => (
-                <span key={i} className="px-4 py-2 rounded-full text-xs font-mono text-[#888880] whitespace-nowrap" style={{ background: '#111111', border: '1px solid #222222' }}>{tech}</span>
+                <div key={i} className="tech-badge">
+                  <i className={DEVICON_MAP[tech] ?? 'devicon-devicon-plain'} />
+                  <span>{tech}</span>
+                </div>
               ))}
             </div>
           </div>
         </div>
       </div>
-      <style>{`@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
     </section>
   );
 }

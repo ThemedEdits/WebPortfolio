@@ -3,11 +3,9 @@ import { Search } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
 import ProjectCard from '../../components/ui/ProjectCard';
 import SkeletonCard from '../../components/ui/SkeletonCard';
-import SectionHeader from '../../components/ui/SectionHeader';
 
 const CATEGORIES = ['All', 'Web App', 'Landing Page', 'SaaS', 'E-Commerce', 'Portfolio', 'Other'];
 
-// Skeleton matches exact layout of real search bar
 function SearchBarSkeleton() {
   return (
     <div className="relative w-full">
@@ -16,18 +14,13 @@ function SearchBarSkeleton() {
   );
 }
 
-// Skeleton matches exact layout of filter pills row
 function FilterSkeleton() {
   const widths = [40, 60, 80, 96, 80, 96, 64];
   return (
     <div className="relative">
       <div className="flex gap-2 overflow-x-hidden pb-1 sm:flex-wrap sm:justify-center">
         {widths.map((w, i) => (
-          <div
-            key={i}
-            className="skeleton h-9 rounded-xl flex-shrink-0"
-            style={{ width: `${w}px` }}
-          />
+          <div key={i} className="skeleton h-9 rounded-xl flex-shrink-0" style={{ width: `${w}px` }} />
         ))}
       </div>
     </div>
@@ -62,22 +55,17 @@ export default function Projects() {
   return (
     <div className="min-h-screen">
 
-      {/* ── Hero with royalty-free image ── */}
-      <div className="relative h-52 xs:h-60 sm:h-72 md:h-80 overflow-hidden mt-16 sm:mt-7">
-        {/* Background image */}
+      {/* ── Hero ── */}
+      <div className="relative h-52 xs:h-60 sm:h-72 md:h-80 overflow-hidden mt-20 sm:mt-4">
         <img
           src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1600&h=600&fit=crop&auto=format&q=80"
           alt="Projects hero"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        {/* Dark overlay gradient */}
         <div className="absolute inset-0"
           style={{ background: 'linear-gradient(to bottom, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.7) 60%, #0a0a0a 100%)' }} />
-        {/* Top navbar fade */}
         <div className="absolute inset-0"
           style={{ background: 'linear-gradient(to bottom, #0a0a0a 0%, transparent 30%)' }} />
-
-        {/* Hero text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center pt-10 sm:pt-12">
           <span className="section-tag mb-3 sm:mb-4 text-[10px] sm:text-xs">Portfolio</span>
           <h1 className="font-display font-extrabold text-white leading-tight mb-2 sm:mb-3"
@@ -94,10 +82,8 @@ export default function Projects() {
       {/* ── Content ── */}
       <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-16 sm:pb-24">
 
-        {/* Search + Filter — both skeletons sit in same flex column as the real UI */}
+        {/* Search + Filter */}
         <div className="flex flex-col gap-3 mb-5 sm:mb-8">
-
-          {/* Search */}
           {loading ? <SearchBarSkeleton /> : (
             <div className="relative w-full">
               <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#555555] pointer-events-none" />
@@ -112,20 +98,15 @@ export default function Projects() {
             </div>
           )}
 
-          {/* Filter pills */}
           {loading ? <FilterSkeleton /> : (
             <div className="relative">
-              {/* Right fade on mobile */}
               <div className="sm:hidden absolute right-0 top-0 bottom-1 w-10 pointer-events-none z-10"
                 style={{ background: 'linear-gradient(to right, transparent, #0a0a0a)' }} />
-
               <div
                 className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:justify-center"
                 style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                <style>{`
-                  .filter-row::-webkit-scrollbar { display: none; }
-                `}</style>
+                <style>{`.filter-row::-webkit-scrollbar { display: none; }`}</style>
                 {CATEGORIES.map(cat => (
                   <button
                     key={cat}
@@ -155,17 +136,16 @@ export default function Projects() {
           </p>
         )}
 
-        {/* Grid — 1 col on tiny screens, 2 col sm+, 3 col lg+ */}
+        {/* Grid — max 3 columns on desktop */}
         <div
           ref={ref}
-          className="grid gap-3 sm:gap-4 lg:gap-6"
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))' }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 items-stretch"
         >
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             : filtered.length > 0
             ? filtered.map((project, i) => (
-                <div key={project.id} className="reveal" style={{ transitionDelay: `${(i % 6) * 0.07}s` }}>
+                <div key={project.id} className="reveal flex" style={{ transitionDelay: `${(i % 6) * 0.07}s` }}>
                   <ProjectCard project={project} />
                 </div>
               ))
@@ -179,43 +159,29 @@ export default function Projects() {
                       style={{ background: 'rgba(245,166,35,0.06)', border: '1px solid rgba(245,166,35,0.15)' }} />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ color: '#F5A623' }}>
-                        <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5"
-                          strokeDasharray="4 2"
+                        <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 2"
                           style={{ animation: 'dashRotate 3s linear infinite', transformOrigin: '11px 11px' }} />
                         <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                         <circle cx="11" cy="11" r="3" fill="rgba(245,166,35,0.2)" stroke="currentColor" strokeWidth="1" />
                       </svg>
                     </div>
                   </div>
-
                   <div className="text-center">
                     <p className="text-white font-display font-semibold mb-1"
-                      style={{ fontSize: 'clamp(0.875rem, 3vw, 1.125rem)' }}>
-                      No projects found
-                    </p>
-                    <p className="text-[#555555] font-mono"
-                      style={{ fontSize: 'clamp(0.65rem, 2vw, 0.75rem)' }}>
+                      style={{ fontSize: 'clamp(0.875rem, 3vw, 1.125rem)' }}>No projects found</p>
+                    <p className="text-[#555555] font-mono" style={{ fontSize: 'clamp(0.65rem, 2vw, 0.75rem)' }}>
                       Try a different search or category
                     </p>
                   </div>
-
                   {(search || category !== 'All') && (
-                    <button
-                      onClick={() => { setSearch(''); setCategory('All'); }}
+                    <button onClick={() => { setSearch(''); setCategory('All'); }}
                       className="btn-outline mt-1"
-                      style={{ fontSize: 'clamp(0.65rem, 2vw, 0.75rem)', padding: '0.5rem 1.25rem' }}
-                    >
+                      style={{ fontSize: 'clamp(0.65rem, 2vw, 0.75rem)', padding: '0.5rem 1.25rem' }}>
                       Clear filters
                     </button>
                   )}
                 </div>
-
-                <style>{`
-                  @keyframes dashRotate {
-                    from { stroke-dashoffset: 0; }
-                    to   { stroke-dashoffset: -24; }
-                  }
-                `}</style>
+                <style>{`@keyframes dashRotate { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -24; } }`}</style>
               </div>
             )
           }

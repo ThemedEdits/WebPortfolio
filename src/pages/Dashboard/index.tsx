@@ -2,14 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../utils/firebase';
+import { motion, Reorder } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
-import { useProjects, addProject, updateProject, deleteProject, toSlug, type Project } from '../../hooks/useProjects';
+import { useProjects, addProject, updateProject, deleteProject, updateProjectPriorities, toSlug, type Project } from '../../hooks/useProjects';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import CustomSelect from '../../components/ui/CustomSelect';
 import TechStackPicker from '../../components/ui/TechStackPicker';
 import {
   LayoutDashboard, FolderOpen, Plus, LogOut, Edit2, Trash2,
-  X, Upload, Image, Eye, Star, CheckCircle2, AlertCircle, ArrowLeft
+  X, Upload, Image, Eye, Star, CheckCircle2, AlertCircle, ArrowLeft,
+  GripVertical
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -57,7 +59,7 @@ function RecentTableSkeleton() {
     <div className="overflow-x-auto">
       <table className="w-full min-w-[500px]">
         <thead><tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          {['Title','Category','Featured','Actions'].map(h => (
+          {['Title', 'Category', 'Featured', 'Actions'].map(h => (
             <th key={h} className="text-left px-4 sm:px-6 py-3 text-xs font-mono text-[#555555] uppercase tracking-wider">{h}</th>
           ))}
         </tr></thead>
@@ -78,7 +80,7 @@ function AllProjectsTableSkeleton() {
     <div className="overflow-x-auto">
       <table className="w-full min-w-[640px]">
         <thead><tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          {['#','Thumb','Title','Category','Featured','Tech','Actions'].map(h => (
+          {['#', 'Thumb', 'Title', 'Category', 'Featured', 'Tech', 'Actions'].map(h => (
             <th key={h} className="text-left px-4 sm:px-5 py-4 text-xs font-mono text-[#555555] uppercase tracking-wider">{h}</th>
           ))}
         </tr></thead>
@@ -94,6 +96,102 @@ function AllProjectsTableSkeleton() {
           </tr>
         ))}</tbody>
       </table>
+    </div>
+  );
+}
+
+// ── Drag-to-reorder Featured Projects ─────────────────────────────────────────
+function FeaturedOrderPanel({ projects }: { projects: Project[] }) {
+  const featured = [...projects.filter(p => p.featured === true)].sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
+  const [items, setItems] = useState<Project[]>(featured);
+  const [saving, setSaving] = useState(false);
+  const dragOverIndex = useRef<number | null>(null);
+
+  useEffect(() => {
+    setItems([...projects.filter(p => p.featured === true)].sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999)));
+  }, [projects]);
+
+  if (featured.length === 0) return null;
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateProjectPriorities(items.map((p, i) => ({ id: p.id, priority: i + 1 })));
+      toast.success('Featured order saved!');
+    } catch {
+      toast.error('Failed to save order');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: '#111111', border: '1px solid rgba(245,166,35,0.2)' }}>
+      <div className="px-5 sm:px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div>
+          <h3 className="font-display font-semibold text-white text-sm sm:text-base">Featured Projects Order</h3>
+          <p className="text-[10px] sm:text-xs text-[#555555] mt-0.5">Drag rows to reorder — top 3 appear on homepage</p>
+        </div>
+        <button onClick={handleSave} disabled={saving}
+          className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-60">
+          {saving
+            ? <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+            : <CheckCircle2 size={13} />}
+          Save Order
+        </button>
+      </div>
+      <div className="p-3 sm:p-4">
+        <Reorder.Group
+          axis="y"
+          values={items}
+          onReorder={setItems}
+          className="space-y-2"
+        >
+          {items.map((p, i) => (
+            <Reorder.Item
+              key={p.id}
+              value={p}
+              className="flex items-center gap-3 p-3 rounded-xl select-none"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}
+              whileDrag={{ scale: 1.03 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            >
+              {/* Rank */}
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold"
+                style={{
+                  background: i < 3 ? 'rgba(245,166,35,0.15)' : 'rgba(255,255,255,0.05)',
+                  color: i < 3 ? '#F5A623' : '#555555',
+                }}
+              >
+                {i + 1}
+              </div>
+
+              {/* Thumb */}
+              {p.thumbnail ? (
+                <img src={p.thumbnail} className="w-10 h-8 object-cover rounded-lg" />
+              ) : (
+                <div className="w-10 h-8 rounded-lg bg-[#1a1a1a]" />
+              )}
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="text-xs sm:text-sm text-white font-medium truncate">
+                  {p.title}
+                </div>
+                <div className="text-[10px] text-[#555555] font-mono">
+                  {p.category}
+                </div>
+              </div>
+
+              <GripVertical size={14} className="text-[#444444]" />
+            </Reorder.Item>
+          ))}
+        </Reorder.Group>
+      </div>
     </div>
   );
 }
@@ -174,22 +272,16 @@ export default function Dashboard() {
     <div className="min-h-screen bg-bg flex flex-col md:flex-row">
       <style>{`
         @keyframes dbShimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-
-        /* Sliding bubble indicator */
         .nav-bubble {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          height: calc(100% - 12px);
-          border-radius: 14px;
-          background: #F5A623;
+          position: absolute; top: 50%; transform: translateY(-50%);
+          height: calc(100% - 12px); border-radius: 14px; background: #F5A623;
           transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
           z-index: 0;
         }
       `}</style>
 
-      {/* ── Desktop sidebar (hidden on mobile) ── */}
-      <aside className="hidden md:flex w-60 lg:w-64 shrink-0 flex-col"
+      {/* ── Desktop sidebar ── */}
+      <aside className="hidden md:flex fixed top-0 left-0 h-screen w-60 lg:w-64 flex-col z-40 overflow-hidden"
         style={{ background: 'rgba(10,10,10,0.98)', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="p-5 lg:p-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <Link to="/" className="flex items-center gap-3">
@@ -229,7 +321,7 @@ export default function Dashboard() {
       </aside>
 
       {/* ── Main content ── */}
-      <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 pb-28 md:pb-8">
+      <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 pb-28 md:pb-8 md:ml-60 lg:ml-64">
 
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between mb-5">
@@ -259,25 +351,29 @@ export default function Dashboard() {
             {loading
               ? <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">{Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}</div>
               : <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-                  {[
-                    { label: 'Total Projects', value: projects.length, icon: FolderOpen, color: '#F5A623' },
-                    { label: 'Featured', value: featuredCount, icon: Star, color: '#f59e0b' },
-                    { label: 'Categories', value: [...new Set(projects.map(p => p.category))].length, icon: LayoutDashboard, color: '#FFD07A' },
-                    { label: 'Live URLs', value: projects.filter(p => p.liveUrl).length, icon: Eye, color: '#ffffff' },
-                  ].map(stat => {
-                    const Icon = stat.icon;
-                    return (
-                      <div key={stat.label} className="rounded-2xl p-4 sm:p-6" style={{ background: '#111111', border: '1px solid #222222' }}>
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center mb-3 sm:mb-4" style={{ background: `${stat.color}15`, border: `1px solid ${stat.color}30` }}>
-                          <Icon size={16} style={{ color: stat.color }} />
-                        </div>
-                        <div className="font-display font-extrabold text-2xl sm:text-3xl text-white mb-0.5 sm:mb-1">{stat.value}</div>
-                        <div className="text-[10px] sm:text-xs text-[#555555] font-mono leading-tight">{stat.label}</div>
+                {[
+                  { label: 'Total Projects', value: projects.length, icon: FolderOpen, color: '#F5A623' },
+                  { label: 'Featured', value: featuredCount, icon: Star, color: '#f59e0b' },
+                  { label: 'Categories', value: [...new Set(projects.map(p => p.category))].length, icon: LayoutDashboard, color: '#FFD07A' },
+                  { label: 'Live URLs', value: projects.filter(p => p.liveUrl).length, icon: Eye, color: '#ffffff' },
+                ].map(stat => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={stat.label} className="rounded-2xl p-4 sm:p-6" style={{ background: '#111111', border: '1px solid #222222' }}>
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center mb-3 sm:mb-4" style={{ background: `${stat.color}15`, border: `1px solid ${stat.color}30` }}>
+                        <Icon size={16} style={{ color: stat.color }} />
                       </div>
-                    );
-                  })}
-                </div>
+                      <div className="font-display font-extrabold text-2xl sm:text-3xl text-white mb-0.5 sm:mb-1">{stat.value}</div>
+                      <div className="text-[10px] sm:text-xs text-[#555555] font-mono leading-tight">{stat.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
             }
+
+            {/* ── Featured order drag panel ── */}
+            {!loading && <FeaturedOrderPanel projects={projects} />}
+
             {loading ? <LastProjectSkeleton /> : lastProject && (
               <div className="rounded-2xl p-5 sm:p-6" style={{ background: '#111111', border: '1px solid #222222' }}>
                 <h3 className="font-display font-semibold text-white text-xs sm:text-sm mb-4">Last Uploaded Project</h3>
@@ -299,7 +395,7 @@ export default function Dashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[460px]">
                     <thead><tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      {['Title','Category','Featured','Actions'].map(h => <th key={h} className="text-left px-4 sm:px-6 py-3 text-[10px] sm:text-xs font-mono text-[#555555] uppercase tracking-wider">{h}</th>)}
+                      {['Title', 'Category', 'Featured', 'Actions'].map(h => <th key={h} className="text-left px-4 sm:px-6 py-3 text-[10px] sm:text-xs font-mono text-[#555555] uppercase tracking-wider">{h}</th>)}
                     </tr></thead>
                     <tbody>
                       {projects.slice(0, 5).map(p => (
@@ -340,7 +436,7 @@ export default function Dashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[600px]">
                     <thead><tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      {['#','Thumb','Title','Category','Featured','Tech','Actions'].map(h => <th key={h} className="text-left px-4 sm:px-5 py-3 sm:py-4 text-[10px] sm:text-xs font-mono text-[#555555] uppercase tracking-wider">{h}</th>)}
+                      {['#', 'Thumb', 'Title', 'Category', 'Featured', 'Tech', 'Actions'].map(h => <th key={h} className="text-left px-4 sm:px-5 py-3 sm:py-4 text-[10px] sm:text-xs font-mono text-[#555555] uppercase tracking-wider">{h}</th>)}
                     </tr></thead>
                     <tbody>
                       {projects.map((p, i) => (
@@ -457,24 +553,16 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* ── Mobile bottom navbar with sliding bubble ── */}
+      {/* ── Mobile bottom navbar ── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2"
         style={{ background: 'linear-gradient(to top, #0a0a0a 60%, transparent)' }}>
         <div className="relative flex items-center rounded-2xl overflow-hidden p-1.5"
           style={{ background: 'rgba(17,17,17,0.95)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-
-          {/* Sliding bubble */}
-          <div className="nav-bubble" style={{
-            width: `calc(${100 / navItems.length}% - 6px)`,
-            left: `calc(${(activeIndex * 100) / navItems.length}% + 3px)`,
-          }} />
-
-          {navItems.map((item, idx) => {
-            const Icon = item.icon;
-            const active = view === item.id;
+          <div className="nav-bubble" style={{ width: `calc(${100 / navItems.length}% - 6px)`, left: `calc(${(activeIndex * 100) / navItems.length}% + 3px)` }} />
+          {navItems.map((item) => {
+            const Icon = item.icon; const active = view === item.id;
             return (
-              <button key={item.id}
-                onClick={() => { setView(item.id as any); if (item.id === 'add') resetForm(); }}
+              <button key={item.id} onClick={() => { setView(item.id as any); if (item.id === 'add') resetForm(); }}
                 className="relative z-10 flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-colors duration-200"
                 style={{ color: active ? '#000000' : '#555555' }}>
                 <Icon size={18} />

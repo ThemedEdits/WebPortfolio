@@ -94,21 +94,6 @@ export default function HeroSection() {
             Contact Me
           </Link>
         </div>
-
-        {/* Stats */}
-        <div className="hero-item flex flex-row items-center justify-center gap-8 sm:gap-16"
-          style={{ animationDelay: '0.5s' }}>
-          {[
-            { value: '20+', label: 'Projects Built' },
-            { value: '5+', label: 'Years Experience' },
-            { value: '100%', label: 'Client Satisfaction' },
-          ].map(stat => (
-            <div key={stat.label} className="text-center">
-              <div className="font-display font-extrabold text-2xl sm:text-3xl text-gradient mb-1">{stat.value}</div>
-              <div className="text-[10px] sm:text-xs text-[#555555] font-mono tracking-widest uppercase">{stat.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Floating badges — desktop only */}
